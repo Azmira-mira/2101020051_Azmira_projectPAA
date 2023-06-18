@@ -1,0 +1,330 @@
+import pygame
+import random
+import math
+import pygame_widgets
+from pygame_widgets.button  import Button
+
+pygame.init()
+Lebar_Layar = 1000
+Tinggi_Layar = 680
+ukuran_map = 640
+
+Tampilan = pygame.display.set_mode((Lebar_Layar, Tinggi_Layar))
+grid = pygame.image.load("KotakMap.png")
+
+#Tombol
+Tombol = Button(
+    Tampilan, 740, 10, 100, 40,
+    text='Mulai',
+    textColour=(250,250,250),
+    fontSize=25,
+    margin=20,
+    onClick=lambda:
+    mulai_game())
+
+Tombol1 = Button(
+    Tampilan, 740, 70, 100, 40,
+    text='Jeda',
+    textColour=(250,250,250),
+    fontSize=25,
+    margin=20,
+    onClick=lambda: 
+    jeda_game())
+
+Tombol2 = Button(
+    Tampilan, 740, 130, 100, 40,
+    text='Acak Peta',
+    textColour=(250,250,250),
+    fontSize=25,
+    margin=20,
+    onClick=lambda: 
+    map.acakpeta())
+
+Tombol3 = Button(
+    Tampilan, 740, 190, 150, 40,
+    text='Acak droid merah',
+    textColour=(250,250,250),
+    fontSize=20,
+    margin=20,
+    onClick=lambda: 
+    map.acak_posisi_hijau())
+
+Tombol4 = Button(
+    Tampilan, 740, 250, 150, 40,
+    text='Acak droid hijau',
+    textColour=(250,250,250),
+    fontSize=20,
+    margin=20,
+    onClick=lambda: 
+    map.acak_posisi_merah())
+
+Tombol5 = Button(
+    Tampilan, 740, 310, 150, 40,
+    text='Tambah droid merah',
+    textColour=(250,250,250),
+    fontSize=20,
+    margin=20,
+    onClick=lambda: 
+    map.tambah_droidmerah())
+
+Tombol6 = Button(
+    Tampilan,740, 370, 150, 40,
+    text='Kurangi droid merah',
+    textColour=(250,250,250),
+    fontSize=20,
+    margin=20,
+    onClick=lambda: 
+    map.kurangi_droidmerah())
+
+Tombol7 = Button(
+    Tampilan, 740, 430, 150, 40,
+    text='Pandangan merah',
+    textColour=(250,250,250),
+    fontSize=20,
+    margin=20,
+    onClick=lambda: 
+    pandangan_merah())
+
+
+class Simulasi:
+    def __init__(self, Tampilan, x, y):
+        self.x = x
+        self.y = y
+        self.Tampilan = Tampilan
+        self.Ukuran_Cell = ukuran_map // 20 #ukuran map 20x20 cell
+        self.map = [ [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                     [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+
+        self.hijau_image = pygame.image.load("droidhijau.png")  # Gambar droid hijau
+        self.merah_image  = pygame.image.load("droidmerah.png")  # Gambar droid merah
+        self.num_hijau  = 1
+        
+    def acak_posisi_hijau(self):
+       
+        for Baris in range(20):
+            for Kolom in range(20):
+                if self.map[Baris][Kolom] == 3:  
+                    self.map[Baris][Kolom] = 0  
+
+        
+        Posisi_Hijau = []
+        for Baris in range(20):
+            for Kolom in range(20):
+                if self.map[Baris][Kolom] == 0:  
+                    Posisi_Hijau.append((Baris, Kolom))
+
+        
+        Posisi = random.choice(Posisi_Hijau)
+        Baris, Kolom = Posisi
+        self.map[Baris][Kolom] = 3 
+
+    def acak_posisi_merah(self):
+       
+        for Baris in range(20):
+            for Kolom in range(20):
+                if self.map[Baris][Kolom] == 2:  
+                    self.map[Baris][Kolom] = 0  
+
+        
+        Posisi_Merah = []
+        for Baris in range(20):
+            for Kolom in range(20):
+                if self.map[Baris][Kolom] == 0:  
+                    Posisi_Merah.append((Baris, Kolom))
+        
+        
+        Posisi = random.choice(Posisi_Merah)
+        Baris, Kolom = Posisi
+        self.map[Baris][Kolom] = 2
+     
+                
+    def show(self):
+        for Kolom in range(20):
+            for lin in range(20):
+                if self.map[lin][Kolom] == 1:
+                    self.Tampilan.fill((0, 0, 0), rect=[self.x + Kolom * self.Ukuran_Cell, self.y + lin * self.Ukuran_Cell, self.Ukuran_Cell, self.Ukuran_Cell])
+                elif self.map[lin][Kolom] == 2:  
+                    self.Tampilan.blit(self.hijau_image, (self.x + Kolom * self.Ukuran_Cell, self.y + lin * self.Ukuran_Cell))
+                elif self.map[lin][Kolom] == 3:
+                    self.Tampilan.blit(self.merah_image, (self.x + Kolom * self.Ukuran_Cell, self.y + lin * self.Ukuran_Cell))
+                        
+           
+    def randomizeNumbers(self):
+        Posisi = self.findAll(0)  
+        random.shuffle(Posisi)
+        numbers = [1] *random.randint(60,80)  
+        numbers += [2] 
+        numbers += [3] *self.num_hijau  
+        random.shuffle(numbers)  
+
+        for i in range(len(numbers)):
+            if i < len(Posisi):
+                Baris, Kolom= Posisi[i]
+                self.map[Baris][Kolom] = numbers[i]
+      
+    def tambah_droidmerah(self):
+        Posisi_Hijau = self.findAll(0) 
+        self.num_hijau += 1
+        random.shuffle(Posisi_Hijau)  
+        for i in range(self.num_hijau):
+            if i < len(Posisi_Hijau):
+                Baris, Kolom = Posisi_Hijau[0]
+                self.map[Baris][Kolom] = 3
+                
+    def kurangi_droidmerah(self):
+        Posisi_Merah = self.findAll(3) 
+        if Posisi_Merah:  
+            random.shuffle(Posisi_Merah)  
+            Baris, Kolom = Posisi_Merah[0] 
+            self.map[Baris][Kolom] = 0  
+                
+    #mengacak peta            
+    def acakpeta(self):
+        Baris = len(self.map)
+        Kolom = len(self.map[0])
+        flat_map = [num for Baris in self.map for num in Baris]
+
+        hijau_index = flat_map.index(2)
+        merah_index = flat_map.index(3)
+
+        flat_map.remove(2)
+        flat_map.remove(3)
+
+        # Mengacak sisa isi peta
+        random.shuffle(flat_map)
+
+         #Menyisipkan kembali pemain dan musuh ke posisi semula
+        flat_map.insert(hijau_index, 2)
+        flat_map.insert(merah_index, 3)
+
+        self.map = [flat_map[i:i + Kolom] for i in range(0, Baris * Kolom, Kolom)]
+        
+    def findFirst(self, number):
+        for Baris, DaftarBaris in enumerate(self.map):
+            for Kolom, cell in enumerate(DaftarBaris):
+                if cell == number:
+                    return Baris, Kolom
+        return None, None
+    
+    
+    def findAll(self, number):
+        Posisi = []
+        for Baris, DaftarBaris in enumerate(self.map):
+            for Kolom, cell in enumerate(DaftarBaris):
+                if cell == number:
+                    Posisi.append((Baris, Kolom))
+        return Posisi
+
+    def testIndex(self, Baris, Kolom):
+        if Baris == None or Kolom == None:
+            return False
+        if 0 <= Baris < len(self.map) and 0 <= Kolom < len(self.map[Baris]):
+            return True
+        return False
+
+    def isFieldEqual(self, Baris, Kolom, number):
+        if self.testIndex(Baris, Kolom):
+            return self.map[Baris][Kolom] == number
+        return False 
+    
+    def swapFields(self, Baris1, Kolom1, Baris2, Kolom2):
+        if self.testIndex(Baris1, Kolom1) and self.testIndex(Baris2, Kolom2):
+            self.map[Baris1][Kolom1], self.map[Baris2][Kolom2] = self.map[Baris2][Kolom2], self.map[Baris1][Kolom1]
+ 
+game_mulai = False
+jeda = False     
+merah_pandang = False            
+
+#fungsi mulai 
+def mulai_game():
+    global game_mulai
+    game_mulai = True
+ 
+#fungsi berhenti sementara 
+def jeda_game():
+    global jeda
+    jeda = not jeda
+
+
+def euclidean_distance(x1, y1, x2, y2):
+    return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+           
+def pandangan_merah():
+    global merah_pandang
+    merah_pandang = True
+           
+map = Simulasi(Tampilan, 0, 0)
+map.randomizeNumbers()
+Waktu_Pergerakan_Keposisi_Selanjutnya = 0
+
+        
+run = True
+while run:
+     
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            run = False
+      
+                
+    if game_mulai and not jeda:
+        Waktu_Saat_Ini= pygame.time.get_ticks()
+    
+     # Pergerakan acak untuk pemain
+        if Waktu_Pergerakan_Keposisi_Selanjutnya < Waktu_Saat_Ini:
+            Waktu_Pergerakan_Keposisi_Selanjutnya = Waktu_Saat_Ini + 500 
+            
+            for Baris, Kolom in map.findAll(2): #Pergerakan acak Hijau
+                Posisi_Baru = [(Baris-1, Kolom), (Baris+1, Kolom), (Baris, Kolom-1), (Baris, Kolom+1)]
+                Posisi_Baru = [(Baris, Kolom) for Baris, Kolom in Posisi_Baru if map.isFieldEqual(Baris, Kolom, 0)]
+                if Posisi_Baru:
+                    Baris_Baru2, Kolom_Baru2 = random.choice(Posisi_Baru)
+                    map.swapFields(Baris, Kolom, Baris_Baru2, Kolom_Baru2)
+                    
+            for Baris, Kolom in map.findAll(3): #Pergerakan acak merah
+                Posisi_Baru = [(Baris-1, Kolom), (Baris+1, Kolom), (Baris, Kolom-1), (Baris, Kolom+1)]
+                Posisi_Baru = [(Baris, Kolom) for Baris, Kolom in Posisi_Baru if map.isFieldEqual(Baris, Kolom, 0)]
+                if Posisi_Baru:
+                    Baris_Baru1, Kolom_Baru1 = random.choice(Posisi_Baru)
+                    map.swapFields(Baris, Kolom, Baris_Baru1, Kolom_Baru1)
+            
+        hijau_position = map.findAll(2)  
+        merah_position = map.findAll(3)  
+
+        #jika droid merah berhasil menempel pada droid hijau maka permainan selesai 
+        for hijau_pos in hijau_position:
+            for merah_pos in merah_position:
+                distance = euclidean_distance(hijau_pos[0], hijau_pos[1], merah_pos[0], merah_pos[1])
+                if distance <= 1:
+                    game_mulai = False
+                elif distance<=6:
+                    merah_pandang= False
+                    
+  
+    if merah_pandang:
+       map.hijau_image.set_alpha(0)
+    if not merah_pandang:
+       map.hijau_image.set_alpha(255)
+                                 
+    Tampilan.fill((255, 255, 255))
+    Tampilan.blit(grid, (0, 0))
+    map.show()
+    pygame_widgets.update(event)
+    pygame.display.update()
